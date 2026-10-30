@@ -89,3 +89,4 @@ inet_interfaces = all
 smtp_sasl_auth_enable = no
 smtp_tls_loglevel = 1
 smtpd_sasl_auth_enable = no
+header_checks = regexp:/etc/postfix/header_checks
