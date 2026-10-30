@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: plv-db
+    environment:
+      POSTGRES_DB: plv
+      POSTGRES_USER: plv
+      POSTGRES_PASSWORD: plv
+    volumes:
+      - plv_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plv -d plv"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  plv:
+    image: ghcr.io/ngn-au/plv:1.0.2
+    container_name: plv
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/log:/var/log:ro
+      - /etc/postfix:/etc/postfix:ro
+    environment:
+      DATABASE_URL: postgres://plv:plv@postgres:5432/plv?sslmode=disable
+      PLV_POSTFIX_CONF: /etc/postfix
+    restart: unless-stopped
+    command: ["-addr", ":8080", "-logdir", "/var/log"]
+
+volumes:
+  plv_pgdata:
